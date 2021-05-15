@@ -120,40 +120,40 @@ impl Editor {
         }
     }
 
-    pub(crate) fn get_buffer(&self) -> &Rope {
+    pub fn get_buffer(&self) -> &Rope {
         &self.text
     }
 
-    pub(crate) fn get_layers(&self) -> &Layers {
+    pub fn get_layers(&self) -> &Layers {
         &self.layers
     }
 
-    pub(crate) fn get_layers_mut(&mut self) -> &mut Layers {
+    pub fn get_layers_mut(&mut self) -> &mut Layers {
         &mut self.layers
     }
 
-    pub(crate) fn get_head_rev_token(&self) -> u64 {
+    pub fn get_head_rev_token(&self) -> u64 {
         self.engine.get_head_rev_id().token()
     }
 
-    pub(crate) fn get_edit_type(&self) -> EditType {
+    pub fn get_edit_type(&self) -> EditType {
         self.this_edit_type
     }
 
-    pub(crate) fn get_active_undo_group(&self) -> usize {
+    pub fn get_active_undo_group(&self) -> usize {
         *self.live_undos.last().unwrap_or(&0)
     }
 
-    pub(crate) fn update_edit_type(&mut self) {
+    pub fn update_edit_type(&mut self) {
         self.last_edit_type = self.this_edit_type;
         self.this_edit_type = EditType::Other
     }
 
-    pub(crate) fn set_pristine(&mut self) {
+    pub fn set_pristine(&mut self) {
         self.pristine_rev_id = self.engine.get_head_rev_id();
     }
 
-    pub(crate) fn is_pristine(&self) -> bool {
+    pub fn is_pristine(&self) -> bool {
         self.engine.is_equivalent_revision(self.pristine_rev_id, self.engine.get_head_rev_id())
     }
 
@@ -162,7 +162,7 @@ impl Editor {
     ///
     /// This is used for things such as recording playback, where you don't want the
     /// individual events to be undoable, but instead the entire playback should be.
-    pub(crate) fn set_force_undo_group(&mut self, force_undo_group: bool) {
+    pub fn set_force_undo_group(&mut self, force_undo_group: bool) {
         trace_payload("Editor::set_force_undo_group", &["core"], force_undo_group.to_string());
         self.force_undo_group = force_undo_group;
     }
@@ -207,7 +207,7 @@ impl Editor {
         self.text = self.engine.get_head().clone();
     }
 
-    pub(crate) fn calculate_undo_group(&mut self) -> usize {
+    pub fn calculate_undo_group(&mut self) -> usize {
         let has_undos = !self.live_undos.is_empty();
         let force_undo_group = self.force_undo_group;
         let is_unbroken_group = !self.this_edit_type.breaks_undo_group(self.last_edit_type);
@@ -246,7 +246,7 @@ impl Editor {
     /// a 3-tuple containing the delta representing the changes, the previous
     /// buffer, and an `InsertDrift` enum describing the correct selection update
     /// behaviour.
-    pub(crate) fn commit_delta(&mut self) -> Option<(RopeDelta, Rope, InsertDrift)> {
+    pub fn commit_delta(&mut self) -> Option<(RopeDelta, Rope, InsertDrift)> {
         let _t = trace_block("Editor::commit_delta", &["core"]);
 
         if self.engine.get_head_rev_id() == self.last_rev_id {
@@ -276,7 +276,7 @@ impl Editor {
     /// Attempts to find the delta from head for the given `RevToken`. Returns
     /// `None` if the revision is not found, so this result should be checked if
     /// the revision is coming from a plugin.
-    pub(crate) fn delta_rev_head(&self, target_rev_id: RevToken) -> Option<RopeDelta> {
+    pub fn delta_rev_head(&self, target_rev_id: RevToken) -> Option<RopeDelta> {
         self.engine.try_delta_rev_head(target_rev_id).ok()
     }
 
@@ -368,7 +368,7 @@ impl Editor {
         }
     }
 
-    pub(crate) fn do_cut(&mut self, view: &mut View) -> Value {
+    pub fn do_cut(&mut self, view: &mut View) -> Value {
         let result = self.do_copy(view);
         let delta = edit_ops::delete_sel_regions(&self.text, &view.sel_regions());
         if !delta.is_identity() {
@@ -378,7 +378,7 @@ impl Editor {
         result
     }
 
-    pub(crate) fn do_copy(&self, view: &View) -> Value {
+    pub fn do_copy(&self, view: &View) -> Value {
         if let Some(val) = edit_ops::extract_sel_regions(&self.text, view.sel_regions()) {
             Value::String(val.into_owned())
         } else {
@@ -551,7 +551,7 @@ impl Editor {
         }
     }
 
-    pub(crate) fn do_edit(
+    pub fn do_edit(
         &mut self,
         view: &mut View,
         kill_ring: &mut Rope,
@@ -665,7 +665,7 @@ impl Editor {
         view.update_annotations(plugin, iv, Annotations { items: spans, annotation_type });
     }
 
-    pub(crate) fn get_rev(&self, rev: RevToken) -> Option<Cow<Rope>> {
+    pub fn get_rev(&self, rev: RevToken) -> Option<Cow<Rope>> {
         let text_cow = if rev == self.engine.get_head_rev_id().token() {
             Cow::Borrowed(&self.text)
         } else {
